@@ -10,15 +10,20 @@ public class MapGenerator : MonoBehaviour
     public GameObject room;
     public GameObject corridor;
     public GameObject corridorWall;
+    public GameObject roomWall;
+    public GameObject door;
+    public GameObject corridorCeiling;
+    public GameObject roomCeiling;
     private readonly Random _rand = new Random();
     public int width;
     public int height;
     private String[,] _maze;
-    private Dictionary<string, HashSet<string>> _rooms;
+    private Dictionary<string, List<Coords>> _rooms;
     // Start is called before the first frame update
     void Start()
     {
         _maze = new string[height, width];
+        _rooms = new Dictionary<string, List<Coords>>{};
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
@@ -26,18 +31,27 @@ public class MapGenerator : MonoBehaviour
                 _maze[i, j] = ".";
             }
         }
-        for (int n = 0; n < 100; n++)
+        for (int n = 0; n < 50; n++)
+        {
+            MakeRoom(2, 3, n);
+        }
+        for (int n = 50; n < 100; n++)
+        {
+            MakeRoom(3, 2, n);
+        }
+        for (int n = 100; n < 50; n++)
         {
             MakeRoom(2, 2, n);
         }
-        for (int n = 0; n < 100; n++)
-        {
-            MakeRoom(1, 2, n);
-        }
-        for (int n = 0; n < 100; n++)
-        {
-            MakeRoom(2, 1, n);
-        }
+        // for (int n = 200; n < 300; n++)
+        // {
+        //     MakeRoom(1, 2, n);
+        // }
+        // for (int n = 300; n < 350; n++)
+        // {
+        //     MakeRoom(2, 1, n);
+        // }
+        MakeDoors();
         Generate();
     }
 
@@ -45,6 +59,54 @@ public class MapGenerator : MonoBehaviour
     void Update()
     {
         
+    }
+
+    void MakeDoors()
+    {
+        foreach (var pair in _rooms)
+        {
+            bool valid = false;
+            int count = 1;
+            while (!valid)
+            {
+                int index = _rand.Next(0, pair.Value.Count);
+                Coords coords = pair.Value[index];
+                int i = coords.y;
+                int j = coords.x;
+                if (i < 19 && j < 19)
+                {
+                    if (_maze[i + 1, j] == ".")
+                    {
+                        _maze[i, j] = pair.Key + "D";
+                        _maze[i + 1, j] = ".D";
+                        valid = true;
+                    }
+                    else if (_maze[i, j + 1] == ".")
+                    {
+                        _maze[i, j] = pair.Key + "D";
+                        _maze[i, j + 1] = ".D";
+                        valid = true;
+                    }   
+                }
+                if (i > 1 && j > 1)
+                {
+                    if (_maze[i - 1, j] == ".")
+                    {
+                        _maze[i, j] = pair.Key + "D";
+                        _maze[i - 1, j] = ".D";
+                        valid = true;
+                    }
+                    else if (_maze[i, j - 1] == ".")
+                    {
+                        _maze[i, j] = pair.Key + "D";
+                        _maze[i, j - 1] = ".D";
+                        valid = true;
+                    }   
+                }
+                if (count > 10) valid = true;
+                count++;
+            }
+        }
     }
 
     void Generate()
@@ -57,48 +119,140 @@ public class MapGenerator : MonoBehaviour
                 if (_maze[i, j] == ".")
                 {
                     Instantiate(corridor, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
-                    try
-                    {
-                        if (_maze[i-1, j] != "." ) Instantiate(corridorWall, new Vector3((j * 10)-1, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
-                    }
-                    catch (IndexOutOfRangeException e)
-                    {
-                        Instantiate(corridorWall, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
-                    }
-                    try
-                    {
-                        if (_maze[i+1, j] != "." ) Instantiate(corridorWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
-                    }
-                    catch (IndexOutOfRangeException e)
-                    {
-                        Instantiate(corridorWall, new Vector3(j * 10, 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
-                    }
-                    try
-                    {
-                        if (_maze[i, j+1] != "." ) Instantiate(corridorWall, new Vector3((j * 10) + 10, 0, (i * 10)+9), Quaternion.Euler(0, 90, 0), parent);
-                    }
-                    catch (IndexOutOfRangeException e)
-                    {
-                        Instantiate(corridorWall, new Vector3((j * 10)+ 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
-                    }
-                    try
-                    {
-                        if (_maze[i, j-1] != "." ) Instantiate(corridorWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
-                    }
-                    catch (IndexOutOfRangeException e)
-                    {
-                        Instantiate(corridorWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
-                    }
-                    //North = 0, 0, 0 : 0, 0, 0
-                    //Sout = 0, 0, -9.5
-                    //East = x 0.5 y 90
-                    //West x = 10 y 90
-                    //Generates Walls For Corridor
-                    
+                    Instantiate(corridorCeiling, new Vector3(j * 10, 5, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == 0) Instantiate(corridorWall, new Vector3(((j * 10)), 00, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == height-1) Instantiate(corridorWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    if (j == 0) Instantiate(corridorWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    if (j == width-1) Instantiate(corridorWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
                 }
-                else Instantiate(room, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
-                
-                
+                else if (_maze[i, j] == ".D")
+                {
+                    Instantiate(corridor, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    Instantiate(corridorCeiling, new Vector3(j * 10, 5, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == 0) Instantiate(corridorWall, new Vector3(((j * 10)), 00, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == height-1) Instantiate(corridorWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    if (j == 0) Instantiate(corridorWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    if (j == width-1) Instantiate(corridorWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);   
+                }
+                else if (_maze[i, j].Contains("D") && !_maze[i, j].Contains("."))
+                {
+                    Instantiate(room, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    Instantiate(roomCeiling, new Vector3(j * 10, 5, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == 0) Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == height-1) Instantiate(roomWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    if (j == 0) Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    if (j == width-1) Instantiate(roomWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    string roomNo = _maze[i, j].Replace("D", "");
+                    
+                    // DOORS
+                    try // North
+                    {
+                        if (_maze[i+1, j] == ".D") Instantiate(door, new Vector3(((j * 10)), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // South
+                    {
+                        if (_maze[i-1, j] == ".D") Instantiate(door, new Vector3((j * 10), 0, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(j * 10, 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // East
+                    {
+                        if (_maze[i, j+1] == ".D") Instantiate(door, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10)+ 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    try // West
+                    {
+                        if (_maze[i, j-1] == ".D") Instantiate(door, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    
+                    // WALLS
+                    try // North
+                    {
+                        if (_maze[i+1, j] != roomNo && !_maze[i+1, j].Contains("D")) Instantiate(roomWall, new Vector3(((j * 10)), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // South
+                    {
+                        if (_maze[i-1, j] != roomNo && !_maze[i-1, j].Contains("D")) Instantiate(roomWall, new Vector3((j * 10), 0, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(j * 10, 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // East
+                    {
+                        if (_maze[i, j+1] != roomNo && !_maze[i, j+1].Contains("D")) Instantiate(roomWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10)+ 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    try // West
+                    {
+                        if (_maze[i, j-1] != roomNo && !_maze[i, j-1].Contains("D")) Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                }
+                else if (!_maze[i, j].Contains(".") && !_maze[i, j].Contains("D"))
+                {
+                    Instantiate(room, new Vector3(j * 10, 0, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    Instantiate(roomCeiling, new Vector3(j * 10, 5, i * 10), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == 0) Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    if (i == height-1) Instantiate(roomWall, new Vector3((j * 10), 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    if (j == 0) Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    if (j == width-1) Instantiate(roomWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    try // North
+                    {
+                        if (!_maze[i+1, j].Contains(_maze[i, j])) Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(((j * 10)), 00, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // South
+                    {
+                        if (!_maze[i-1, j].Contains(_maze[i, j])) Instantiate(roomWall, new Vector3((j * 10), 0, (i * 10)+0.5f), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3(j * 10, 0, (i * 10)+10), Quaternion.Euler(0, 0, 0), parent);
+                    }
+                    try // East
+                    {
+                        if (!_maze[i, j+1].Contains(_maze[i, j])) Instantiate(roomWall, new Vector3((j * 10) + 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10)+ 10, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    try // West
+                    {
+                        if (!_maze[i, j-1].Contains(_maze[i, j])) Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+                        Instantiate(roomWall, new Vector3((j * 10) + 0.5f, 0, (i * 10)+10), Quaternion.Euler(0, 90, 0), parent);
+                    }
+                }
             }
         }
     }
@@ -157,13 +311,45 @@ public class MapGenerator : MonoBehaviour
                     if (valid)
                     {
                         _maze[y + i, x + j] = roomNo.ToString();
+                        int xc = x + j;
+                        int yc = y + i;
+                        if (_rooms.ContainsKey(roomNo.ToString()))
+                        {
+                            _rooms[roomNo.ToString()].Add(new Coords(xc, yc));
+                        }
+                        else
+                        {
+                            _rooms.Add(roomNo.ToString(), new List<Coords> {new Coords(xc, yc)});
+                        }
                     }
                 }
                 catch (IndexOutOfRangeException e)
                 {
                     _maze[y + i, x + j] = roomNo.ToString();
+                    int xc = x + j;
+                    int yc = y + i;
+                    if (_rooms.ContainsKey(roomNo.ToString()))
+                    {
+                        _rooms[roomNo.ToString()].Add(new Coords(xc, yc));
+                    }
+                    else
+                    {
+                        _rooms.Add(roomNo.ToString(), new List<Coords> {new Coords(xc, yc)});
+                    }
                 }
             }
         }
+    }
+}
+
+internal class Coords
+{
+    public int x;
+    public int y;
+
+    public Coords(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
     }
 }
