@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7037094887644053726}
   - component: {fileID: 7037094887644053727}
   - component: {fileID: 7037094887644053724}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Corridor
   m_TagString: Untagged
   m_Icon: {fileID: 0}

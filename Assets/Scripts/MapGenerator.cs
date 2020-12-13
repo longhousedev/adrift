@@ -31,15 +31,15 @@ public class MapGenerator : MonoBehaviour
                 _maze[i, j] = ".";
             }
         }
-        for (int n = 0; n < 50; n++)
+        for (int n = 0; n < 20; n++)
         {
             MakeRoom(2, 3, n);
         }
-        for (int n = 50; n < 100; n++)
+        for (int n = 20; n < 40; n++)
         {
             MakeRoom(3, 2, n);
         }
-        for (int n = 100; n < 50; n++)
+        for (int n = 40; n < 60; n++)
         {
             MakeRoom(2, 2, n);
         }
