@@ -10,8 +10,10 @@ public class PlayerController : MonoBehaviour
 {
     public Camera cam;
     private float _stamina;
+    public float health;
     private CharacterController _controller;
     public float movementModifier;
+    public float slow;
     private float _sprintModifier = 1f;
     public Transform groundedSphere;
     public float radius;
@@ -32,23 +34,46 @@ public class PlayerController : MonoBehaviour
     public AudioSource footstepsSource;
 
     private Vector3 _velocity;
-    //private bool _isGrounded;
     public float jumpHeight;
     private void Start()
     {
+        slow = 1;
         _oldPos = transform.position;
         _bobT = 0.3f;
         _lerpT = 0.1f;
         _fov = cam.fieldOfView;
-        _stamina = 100;
+        _stamina = 50;
         _controller = GetComponent<CharacterController>();
         _velocity = Vector3.zero;
         StartCoroutine(nameof(StaminaRegen));
+
+        if (PlayerPrefs.GetInt("Difficulty") == 0)
+        {
+            movementModifier = 4.5f;
+        }
+        else
+        {
+            movementModifier = 3f;
+        }
+        
     }
 
     private void Update()
     {
-        if (transform.position != _oldPos && !footstepsSource.isPlaying) Invoke(nameof(playFootstep), 0.1f);
+        if (PlayerPrefs.GetInt("Difficulty") == 0)
+        {
+            movementModifier = 4.5f * slow;
+        }
+        else
+        {
+            movementModifier = 3f * slow;
+        }
+
+        Debug.Log(PlayerPrefs.GetInt("Difficulty"));
+        Debug.Log(movementModifier);
+        
+        //Footsteps
+        if (transform.position != _oldPos && !footstepsSource.isPlaying && _isGrounded) Invoke(nameof(playFootstep), 0.1f);
         _oldPos = transform.position;
     }
 
@@ -74,17 +99,17 @@ public class PlayerController : MonoBehaviour
         //Head bob
         float oldX = 0;
         float oldY = 1.08f;
-        _bobDelta = Mathf.Sin(Time.time * 5) / 4;
+        _bobDelta = Mathf.Sin(Time.time * 10) / 4;
         _sprintBobDelta = Mathf.Sin(Time.time * 15) / 4;
         var transform2 = cam.transform;
-        if (_isSprinting && movement.magnitude != 0)
+        if (_isGrounded && _isSprinting && movement.magnitude != 0)
         {
             transform2.localPosition = new Vector3(0, 1.08f + _sprintBobDelta,
                 transform2.localPosition.z);
         }
-        else if (!_isSprinting && movement.magnitude != 0)
+        else if (_isGrounded && !_isSprinting && movement.magnitude != 0)
         {
-            transform2.localPosition = new Vector3(0, 1.08f + (_bobDelta / 2),
+            transform2.localPosition = new Vector3(0, 1.08f + (_bobDelta / 1.5f),
                 cam.transform.localPosition.z);
         }
         else

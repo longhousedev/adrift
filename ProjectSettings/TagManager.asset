@@ -7,6 +7,7 @@ TagManager:
   - Spawn Point
   - Rooms
   - GeometryParent
+  - Fader
   layers:
   - Default
   - TransparentFX
@@ -19,9 +20,9 @@ TagManager:
   - PostProcessing
   - Ground
   - Ghost
-  - 
-  - 
-  - 
+  - Camera Spike
+  - Ceiling
+  - Scenery
   - 
   - 
   - 

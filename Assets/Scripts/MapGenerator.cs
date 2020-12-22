@@ -19,6 +19,8 @@ public class MapGenerator : MonoBehaviour
     public int height;
     private String[,] _maze;
     private Dictionary<string, List<Coords>> _rooms;
+    public int camSpawn;
+    public GameObject camera;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,18 +33,18 @@ public class MapGenerator : MonoBehaviour
                 _maze[i, j] = ".";
             }
         }
-        for (int n = 0; n < 20; n++)
-        {
-            MakeRoom(2, 3, n);
-        }
-        for (int n = 20; n < 40; n++)
-        {
-            MakeRoom(3, 2, n);
-        }
-        for (int n = 40; n < 60; n++)
+        for (int n = 0; n < 30; n++)
         {
             MakeRoom(2, 2, n);
         }
+        //for (int n = 20; n < 40; n++)
+        //{
+        //    MakeRoom(3, 2, n);
+        //}
+        //for (int n = 40; n < 60; n++)
+        //{
+        //    MakeRoom(2, 2, n);
+        //}
         // for (int n = 200; n < 300; n++)
         // {
         //     MakeRoom(1, 2, n);
@@ -53,6 +55,21 @@ public class MapGenerator : MonoBehaviour
         // }
         MakeDoors();
         Generate();
+        for (int i = 0; i < camSpawn; i++)
+        {
+            bool valid = false;
+            while(!valid)
+            {
+                int roomNo = _rand.Next(0, _rooms.Count - 1);
+                if (_rooms.ContainsKey(roomNo.ToString()))
+                {
+                    var coords = _rooms[roomNo.ToString()];
+                    Coords coord = coords[_rand.Next(0, coords.Count)];
+                    Instantiate(camera, new Vector3((coord.x * 10) + 5, 1, (coord.y * 10) + 5), Quaternion.Euler(0, 0, 0));
+                    valid = true;
+                }
+            }
+        }
     }
 
     // Update is called once per frame
@@ -73,7 +90,7 @@ public class MapGenerator : MonoBehaviour
                 Coords coords = pair.Value[index];
                 int i = coords.y;
                 int j = coords.x;
-                if (i < 19 && j < 19)
+                if (i < height && j < width)
                 {
                     if (_maze[i + 1, j] == ".")
                     {
@@ -103,7 +120,7 @@ public class MapGenerator : MonoBehaviour
                         valid = true;
                     }   
                 }
-                if (count > 10) valid = true;
+                if (count > 1000) valid = true;
                 count++;
             }
         }
