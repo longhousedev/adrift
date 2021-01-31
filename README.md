@@ -3,7 +3,7 @@ A game inspired by the backrooms urban legend
 
 #Sources
 Music:
-Blue Feather by Kevin MacLeod - https://incompetech.com/music/royalty-free/mp3-royaltyfree/Blue%20Feather.mp3
+- Blue Feather by Kevin MacLeod - https://incompetech.com/music/royalty-free/mp3-royaltyfree/Blue%20Feather.mp3
 Ossuary 6 – Air by Kevin Macleod - https://incompetech.com/music/royalty-free/mp3-royaltyfree/Ossuary%206%20-%20Air.mp3
 Spacial Harvest by Kevin Macleod - https://incompetech.com/music/royalty-free/mp3-royaltyfree/Spacial%20Harvest.mp3
 Sounds:
