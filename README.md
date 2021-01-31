@@ -1,4 +1,4 @@
-# adrift
+# Adrift
 A game inspired by the backrooms urban legend.
 
 ## Sources
